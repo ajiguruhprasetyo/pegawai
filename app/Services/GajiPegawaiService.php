@@ -57,7 +57,14 @@ class GajiPegawaiService
        $data = $request->data;
         try {
             DB::beginTransaction();
-            $this->gajiPegawaiModel::insert($data);
+
+            $data  = collect($data);
+            $chunks = $data->chunk(500);
+            foreach ($chunks as $chunk)
+            {
+                $this->gajiPegawaiModel::insert($chunk->toArray());
+            }
+
             DB::commit();
             $response = response()->json(['success' => true, 'data' => $data], 200);
         } catch (\Throwable $e){
